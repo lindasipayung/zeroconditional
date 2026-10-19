@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Strikers Drum – Zero Conditional</title>
+<style>
+:root{--bg:#0b1020;--panel:#151c36;--fg:#eef2ff;--mut:#9aa5d1;--c1:#ff5d6c;--c2:#ffd23f;--c3:#3ddc97;--c4:#4cc9f0;--line:#2a3560}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#0b1020}}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;flex-direction:column;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px);user-select:none;-webkit-user-select:none;touch-action:manipulation}
+header{padding:8px 12px;text-align:center}
+h1{margin:0;font-size:20px;letter-spacing:2px}
+.q{background:var(--panel);border:1px solid var(--line);border-radius:12px;margin:6px 10px;padding:8px 12px;text-align:center}
+.q .s{font-size:clamp(18px,3.2vw,30px);font-weight:700}
+.q .t{color:var(--mut);font-size:14px;margin-top:2px}
+.q .o{font-size:clamp(15px,2.4vw,22px);margin-top:4px;color:var(--c2);font-weight:600}
+.bar{height:6px;background:var(--line);margin:0 10px;border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;width:100%;background:var(--c3)}
+.score{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:6px 10px 0}
+.score div{border-radius:8px;padding:4px;text-align:center;font-weight:700;font-size:15px;border:2px solid}
+#wrap{flex:1;min-height:150px;margin:6px 10px 0;position:relative}
+canvas{width:100%;height:100%;display:block;border-radius:10px;background:#070b18}
+.ctl{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:6px 10px 10px}
+.ctl div{display:flex;gap:3px}
+.ctl button{flex:1;padding:12px 0;font-size:20px;border:0;border-radius:8px;color:#071;background:#fff;touch-action:manipulation}
+.ctl button:active{transform:scale(.94)}
+.ov{position:absolute;inset:0;background:rgba(7,11,24,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px;border-radius:10px;overflow:auto}
+.ov h2{margin:0 0 8px;font-size:clamp(24px,5vw,40px)}
+.ov p{max-width:560px;color:var(--mut);margin:4px 0;line-height:1.4}
+.ov b{color:var(--fg)}
+.btn{background:var(--c3);color:#052;border:0;border-radius:10px;padding:12px 22px;font-size:18px;font-weight:700;margin:6px 4px;cursor:pointer}
+.btn.alt{background:var(--panel);color:var(--fg);border:1px solid var(--line);padding:8px 14px;font-size:15px}
+.btn.alt.on{background:var(--c4);color:#012}
+.keys{font-size:12px;color:var(--mut);margin-top:8px}
+</style>
+</head>
+<body>
+<header><h1>✈ STRIKERS DRUM · ZERO CONDITIONAL</h1></header>
+<div class="q"><div class="s" id="qs">–</div><div class="t" id="qt"></div><div class="o" id="qo"></div></div>
+<div class="bar"><i id="bar"></i></div>
+<div class="score" id="score"></div>
+<div id="wrap"><canvas id="cv"></canvas>
+<div class="ov" id="ov">
+<h2>✈ STRIKERS DRUM</h2>
+<p id="intro"></p>
+<div>
+<button class="btn alt" data-l="id">Indonesia</button><button class="btn alt" data-l="en">English</button><button class="btn alt on" data-l="both">ID + EN</button>
+</div>
+<button class="btn" id="go">MULAI / START</button>
+<div class="keys">Tim 1: A D W · Tim 2: F H T · Tim 3: J L I · Tim 4: ← → ↑</div>
+</div></div>
+<div class="ctl" id="ctl"></div>
+<script>
+var COL=['#ff5d6c','#ffd23f','#3ddc97','#4cc9f0'];
+var Q=[
+["If you heat ice, it ___.","Jika kamu memanaskan es, ia meleleh.",["melts","will melt","melted"],0],
+["If you don’t water plants, they ___.","Jika kamu tidak menyiram tanaman, mereka mati.",["died","will die","die"],2],
+["Water ___ if you heat it to 100°C.","Air mendidih jika dipanaskan sampai 100°C.",["boil","boils","will boil"],1],
+["If it rains, the ground ___ wet.","Jika hujan, tanah menjadi basah.",["gets","will get","got"],0],
+["If you don’t eat, you ___ hungry.","Jika kamu tidak makan, kamu merasa lapar.",["got","will get","get"],2],
+["If I don’t sleep well, I ___ tired.","Jika aku tidak tidur nyenyak, aku merasa lelah.",["feel","felt","will feel"],0],
+["Plants ___ grow if they don’t get sunlight.","Tanaman tidak tumbuh jika tidak mendapat sinar matahari.",["didn’t","don’t","doesn’t"],1],
+["If you mix red and blue, you ___ purple.","Jika kamu mencampur merah dan biru, kamu mendapat ungu.",["got","will get","get"],2],
+["If people don’t drink water, they ___ dehydrated.","Jika orang tidak minum air, mereka mengalami dehidrasi.",["become","became","will become"],0],
+["She ___ to school if it rains heavily.","Dia tidak berjalan kaki ke sekolah jika hujan deras.",["didn’t walk","won’t walk","doesn’t walk"],2],
+["If you don’t press the button, the machine ___.","Jika kamu tidak menekan tombol, mesin tidak menyala.",["doesn’t start","didn’t start","won’t start"],0],
+["Ice ___ melt if the temperature stays below 0°C.","Es tidak mencair jika suhu tetap di bawah 0°C.",["doesn’t","don’t","didn’t"],0]
+];
+var T={
+id:{intro:"4 tim bermain bersamaan. Geser pesawat, <b>tembak huruf jawaban yang benar</b>, hindari yang salah! Benar +10, salah −5.",tim:"Tim",ok:"Benar!",time:"Waktu habis! Jawaban: ",end:"Selesai!",again:"Main Lagi",win:"Pemenang: "},
+en:{intro:"4 teams play together. Move your plane, <b>shoot the correct answer letter</b>, dodge the wrong ones! Correct +10, wrong −5.",tim:"Team",ok:"Correct!",time:"Time’s up! Answer: ",end:"Finished!",again:"Play Again",win:"Winner: "}
+};
+T.both={intro:T.id.intro+"<br>"+T.en.intro,tim:"Tim",ok:"Benar / Correct!",time:"Waktu habis / Time’s up! ",end:"Selesai / Finished!",again:"Main Lagi / Play Again",win:"Pemenang / Winner: "};
+var lang='both',cv=document.getElementById('cv'),cx=cv.getContext('2d'),W=0,H=0,dpr=1;
+var order=[],qi=0,teams=[],gy=[],alive=[],running=false,qTime=0,QMAX=25,msg='',msgT=0,locked=false,last=0;
+function $(i){return document.getElementById(i)}
+function setLang(l){lang=l;document.querySelectorAll('[data-l]').forEach(function(b){b.classList.toggle('on',b.dataset.l==l)});$('intro').innerHTML=T[l].intro;$('go').textContent=l=='id'?'MULAI':l=='en'?'START':'MULAI / START';if(running)showQ()}
+document.querySelectorAll('[data-l]').forEach(function(b){b.onclick=function(){setLang(b.dataset.l)}});
+// build UI
+var sc='',ct='';
+for(var i=0;i<4;i++){sc+='<div id="sc'+i+'" style="border-color:'+COL[i]+';color:'+COL[i]+'"></div>';
+ct+='<div><button data-t="'+i+'" data-a="L" style="background:'+COL[i]+'">◀</button><button data-t="'+i+'" data-a="F" style="background:'+COL[i]+'">🔥</button><button data-t="'+i+'" data-a="R" style="background:'+COL[i]+'">▶</button></div>'}
+$('score').innerHTML=sc;$('ctl').innerHTML=ct;
+document.querySelectorAll('.ctl button').forEach(function(b){b.addEventListener('pointerdown',function(e){e.preventDefault();act(+b.dataset.t,b.dataset.a)})});
+var KEYS={a:[0,'L'],d:[0,'R'],w:[0,'F'],f:[1,'L'],h:[1,'R'],t:[1,'F'],j:[2,'L'],l:[2,'R'],i:[2,'F'],arrowleft:[3,'L'],arrowright:[3,'R'],arrowup:[3,'F']};
+document.addEventListener('keydown',function(e){var k=KEYS[e.key.toLowerCase()];if(k){e.preventDefault();act(k[0],k[1])}});
+function act(t,a){if(!running||locked)return;var p=teams[t];if(a=='L')p.col=Math.max(0,p.col-1);else if(a=='R')p.col=Math.min(2,p.col+1);else if(p.cd<=0){p.b.push({col:p.col,y:H-50});p.cd=.25}}
+function resize(){var w=$('wrap');dpr=window.devicePixelRatio||1;W=w.clientWidth;H=w.clientHeight;cv.width=W*dpr;cv.height=H*dpr;cx.setTransform(dpr,0,0,dpr,0,0)}
+window.addEventListener('resize',resize);
+function resetLetters(){gy=[-20,-80,-140];alive=[];for(var i=0;i<4;i++)alive.push([1,1,1])}
+function updScore(){for(var i=0;i<4;i++)$('sc'+i).textContent=T[lang].tim+' '+(i+1)+': '+teams[i].s}
+function showQ(){var q=Q[order[qi]];$('qs').textContent=q[0];$('qt').textContent=lang=='en'?'':q[1];
+$('qo').textContent='A. '+q[2][0]+'    B. '+q[2][1]+'    C. '+q[2][2];updScore()}
+function start(){resize();order=Q.map(function(_,i){return i}).sort(function(){return Math.random()-.5});qi=0;teams=[];
+for(var i=0;i<4;i++)teams.push({col:1,px:1,s:0,b:[],cd:0});resetLetters();locked=false;running=true;qTime=QMAX;msg='';$('ov').style.display='none';showQ();last=performance.now();requestAnimationFrame(loop)}
+$('go').onclick=start;setLang('both');
+function next(){qi++;if(qi>=order.length){finish();return}resetLetters();teams.forEach(function(p){p.b=[]});qTime=QMAX;locked=false;showQ()}
+function finish(){running=false;var m=Math.max.apply(null,teams.map(function(t){return t.s}));var w=[];teams.forEach(function(t,i){if(t.s==m)w.push(T[lang].tim+' '+(i+1))});
+var o=$('ov');o.style.display='flex';o.innerHTML='<h2>🏆 '+T[lang].end+'</h2><p style="font-size:22px;color:var(--fg)">'+T[lang].win+w.join(' & ')+' ('+m+')</p><p>'+teams.map(function(t,i){return T[lang].tim+' '+(i+1)+': '+t.s}).join(' · ')+'</p><button class="btn" id="again">'+T[lang].again+'</button>';$('again').onclick=start}
+function flash(s,ms){msg=s;msgT=ms;locked=true;setTimeout(next,ms)}
+function loop(now){if(!running)return;var dt=Math.min(.05,(now-last)/1000);last=now;
+if(!locked){qTime-=dt;if(qTime<=0){var q=Q[order[qi]];flash(T[lang].time+'ABC'[q[3]],1500)}}
+$('bar').style.width=Math.max(0,qTime/QMAX*100)+'%';
+var lw=W/4,cw=lw/3,speed=H*.22;
+for(var c=0;c<3;c++){gy[c]+=speed*dt*(1+c*.08);if(gy[c]>H-45){gy[c]=-20;for(var t=0;t<4;t++)alive[t][c]=1}}
+teams.forEach(function(p,t){p.px+=(p.col-p.px)*Math.min(1,dt*14);p.cd-=dt;
+for(var k=p.b.length-1;k>=0;k--){var b=p.b[k];b.y-=H*1.1*dt;var gone=b.y<-10;
+if(!locked&&alive[t][b.col]&&Math.abs(b.y-gy[b.col])<20){gone=true;alive[t][b.col]=0;
+if(b.col==Q[order[qi]][3]){p.s+=10;updScore();flash(T[lang].tim+' '+(t+1)+' · '+T[lang].ok,1200)}else{p.s=Math.max(0,p.s-5);updScore()}}
+if(gone)p.b.splice(k,1)}});
+// draw
+cx.clearRect(0,0,W,H);
+for(var t=0;t<4;t++){var x0=t*lw;cx.fillStyle=t%2?'rgba(255,255,255,.03)':'rgba(255,255,255,.07)';cx.fillRect(x0,0,lw,H);
+cx.strokeStyle=COL[t];cx.globalAlpha=.5;cx.strokeRect(x0+1,1,lw-2,H-2);cx.globalAlpha=1;
+for(var c=0;c<3;c++){if(!alive[t][c])continue;var X=x0+cw*(c+.5),r=Math.min(cw*.36,22);
+cx.beginPath();cx.arc(X,gy[c],r,0,7);cx.fillStyle=COL[t];cx.fill();cx.fillStyle='#071';cx.font='bold '+Math.round(r*1.1)+'px sans-serif';cx.textAlign='center';cx.textBaseline='middle';cx.fillText('ABC'[c],X,gy[c]+1)}
+var p=teams[t],PX=x0+cw*(p.px+.5);
+cx.fillStyle='#fff';p.b.forEach(function(b){cx.fillRect(x0+cw*(b.col+.5)-2,b.y,4,12)});
+cx.fillStyle=COL[t];cx.beginPath();cx.moveTo(PX,H-42);cx.lineTo(PX-14,H-12);cx.lineTo(PX,H-20);cx.lineTo(PX+14,H-12);cx.closePath();cx.fill()}
+if(locked&&msg){cx.fillStyle='rgba(0,0,0,.6)';cx.fillRect(0,H/2-26,W,52);cx.fillStyle='#fff';cx.font='bold 24px sans-serif';cx.textAlign='center';cx.textBaseline='middle';cx.fillText(msg,W/2,H/2)}
+requestAnimationFrame(loop)}
+</script>
+</body>
+</html>
